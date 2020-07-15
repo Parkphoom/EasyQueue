@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ScanIdCardActivity">
+
+    <TextView
+        android:textColor="@color/black"
+        android:textSize="20dp"
+        android:id="@+id/txtor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/id_edt_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:text="@string/or" />
+
+    <ImageView
+        android:id="@+id/scanlogo"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@+id/txtor"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/icons8_insert_credit_card_160px_3" />
+
+    <TextView
+        android:id="@+id/scanhint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/scanlogo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:text="@string/text_scan_card"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+    <TextView
+        android:layout_marginTop="5dp"
+        android:id="@+id/scanhint2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/scanhint"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="5dp"
+        android:text="@string/text_rescan_card"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+
+        />
+    <TextView
+        android:layout_marginTop="5dp"
+        android:id="@+id/rescan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/scanhint"
+        android:layout_toEndOf="@id/scanhint2"
+        android:layout_centerHorizontal="true"
+        android:text="@string/text_rescan"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        android:textColor="@color/blue_active"
+
+        />
+
+    <TextView
+        android:id="@+id/userinfoheader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/UserInfoheader"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="22sp" />
+
+    <TextView
+        android:id="@+id/edtnamehint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/userinfoheader"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/nameandlastname"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <FrameLayout
+        android:id="@+id/name_edt_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/edtnamehint"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/border"
+        android:padding="10dp">
+
+        <EditText
+            android:id="@+id/name_edt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:hint="@string/edtnamehint"
+            android:imeOptions="actionNext"
+            android:inputType="textNoSuggestions"
+            android:textCursorDrawable="@null" />
+
+        <Button
+            android:id="@+id/clear_name_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/icons8_delete_26px"
+            android:visibility="invisible" />
+
+    </FrameLayout>
+
+    <TextView
+
+        android:id="@+id/edtidhint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/name_edt_layout"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/citizenID"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <FrameLayout
+        android:id="@+id/id_edt_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/edtidhint"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/border"
+        android:padding="10dp">
+
+        <EditText
+            android:id="@+id/id_edt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:hint="@string/citizenIDhint"
+            android:imeOptions="actionDone"
+            android:inputType="numberDecimal"
+            android:maxLength="13"
+            android:singleLine="true"
+            android:textCursorDrawable="@null" />
+
+        <Button
+            android:id="@+id/clear_id_btn"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/icons8_delete_26px"
+            android:visibility="invisible" />
+
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/next_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/nextbtn"
+        android:drawableEnd="@drawable/icons8_right_32px_1"
+        android:gravity="center"
+        android:paddingStart="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:text="@string/next"
+        android:textColor="@color/white"
+        android:textStyle="bold" />
+
+</RelativeLayout>

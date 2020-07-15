@@ -1,0 +1,31 @@
+<resources>
+    //URL MAIN
+    <string name="URL">http://10.0.0.205:</string>
+    <string name="PORT">4001/</string>
+    <string name="ID">5e14a0eba3d7600cac019599/</string>
+    <string name="APIaddqueue">addQueue/</string>
+    <string name="APIgetqueue">queue/</string>
+
+    <string name="app_name">EasyQueue</string>
+    <string name="Category">แผนก</string>
+    <string name="queuewait">คิวที่รอ</string>
+    <string name="text_scan_card">สอดบัตรประชาชน/Please insert Thai id card</string>
+    <string name="next">ต่อไป</string>
+    <string name="dontusecard">ไม่ใช้บัตร</string>
+    <string name="UserInfoheader">กรอกข้อมูลของท่านเพื่อใช้ยืนยันตัวตน</string>
+    <string name="edtnamehint">กรอกชื่อ - นามสกุล</string>
+    <string name="nameandlastname">ชื่อ - นามสกุล</string>
+    <string name="citizenID">เลขประจำตัวประชาชน</string>
+    <string name="citizenIDhint">กรอกเลขประจำตัวประชาชน</string>
+    <string name="back">ย้อนกลับ</string>
+    <string name="Telnoheader">กรอกเบอร์มือถือเพื่อใช้แจ้งเตือน</string>
+    <string name="telno">เบอร์มือถือ</string>
+    <string name="telnohint">กรอกเบอร์มือถือ</string>
+    <string name="success">สำเร็จ!</string>
+    <string name="sms">รับบัตรคิว แล้วรอแจ้งเตือนผ่าน SMS ไปที่เบอร์โทรศัพท์ที่ลงทะเบียนไว้</string>
+    <string name="connect_loading">connecting to sdk</string>
+    <string name="or">หรือ</string>
+    <string name="IcCardLoading">กำลังอ่าน อย่านำบัตรออกจนกว่าจะเสร็จ</string>
+    <string name="text_rescan_card">หากสอดบัตรแล้วเครื่องไม่อ่านกด</string>
+    <string name="text_rescan">อ่านบัตรใหม่</string>
+</resources>
