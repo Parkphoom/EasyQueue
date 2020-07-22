@@ -6,11 +6,13 @@ import com.example.easyqueue.R
 import com.example.queuedemo_kotlin.Retrofit.RetrofitData
 import com.example.queuedemo_kotlin.Retrofit.SendQueueApi
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import io.socket.client.IO
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -68,6 +70,10 @@ class RetrofitCallfunction {
             telnum.toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
 
         val api: SendQueueApi = retrofit.create<SendQueueApi>(SendQueueApi::class.java)
+
+        for(i in 0 until 10){
+
+        }
         val call: Call<RetrofitData> = api.typePost(bodyType, bodyTypeCode, bodyTel, ID)
 
         //finally performing the call
@@ -182,12 +188,17 @@ class RetrofitCallfunction {
                     try {
                         json = JSONObject(js)
                     } catch (e: JSONException) {
-                        e.printStackTrace()
+                        Log.d("getAllQueue_ressss", e.toString())
+
                     }
-                    val message: JSONObject = json?.get("message") as JSONObject
-                    retrofitcallback.onSucess(message)
 
+                    try {
+                        val message: JSONObject = json?.get("message") as JSONObject
+                        retrofitcallback.onSucess(message)
 
+                    } catch (e: JSONException) {
+                        Log.d("getAllQueue_ressss", e.toString())
+                    }
 
                 }
             }
@@ -196,6 +207,66 @@ class RetrofitCallfunction {
                 Log.d("getAllQueue_ressss", "failllll")
                 Log.d("getAllQueue_ressss", t.toString())
 //                ToastMessage().message(this@TypeActivity, t.message)
+            }
+        })
+    }
+
+    fun postTTS(
+        activity: Activity,
+        dataSpeech: SpeechData,
+        param: retrofitCallback
+    ) {
+
+        val URL: String = activity.resources.getString(R.string.URL) + activity.resources
+            .getString(R.string.PORT)
+        Log.d("urllll", URL)
+
+        val TTS: String = activity.resources.getString(R.string.TexttoSpeech)
+
+        val gson = GsonBuilder()
+            .setLenient()
+            .create()
+        val retrofit = Retrofit.Builder()
+            .baseUrl(URL)
+            .addConverterFactory(GsonConverterFactory.create(gson)) //                .client(httpClient)
+            .build()
+        val api: SendQueueApi = retrofit.create<SendQueueApi>(SendQueueApi::class.java)
+
+
+        val call: Call<ResponseBody> = api.postTexttoSpeech(dataSpeech, TTS)
+        Log.d("urllll", java.lang.String.valueOf(dataSpeech))
+
+        //finally performing the call
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
+            ) {
+                Log.d("ressss", "$call $response ${response.body()}")
+                try {
+//                    val directory = File(
+//                        Environment.getExternalStorageDirectory()
+//                            .toString() + File.separator + "Soundtest"
+//                    )
+//                    directory.mkdirs()
+//                    val file = File(directory, "soundtest")
+//                    val fileOutputStream = FileOutputStream(file)
+//                    IOUtils.write(response.body()!!.bytes(), fileOutputStream)
+//                    Log.e("logTag", directory.absolutePath)
+
+                    param.onSucess(response.body()!!.bytes())
+                } catch (e: IOException) {
+                    Log.e("logTag", "Error while writing file!")
+                    Log.e("logTag", e.toString())
+                }
+            }
+
+            override fun onFailure(
+                call: Call<ResponseBody>,
+                t: Throwable
+            ) {
+                Log.d("ressss", "failllll $t")
+
             }
         })
     }

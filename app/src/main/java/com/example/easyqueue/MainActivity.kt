@@ -12,6 +12,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.example.easyqueue.Public.Data
+import com.example.easyqueue.Public.PublicFunction
 import com.example.easyqueue.Retrofit.RetrofitCallfunction
 import com.example.easyqueue.Retrofit.retrofitCallback
 import com.sunmi.peripheral.printer.InnerPrinterCallback
@@ -99,7 +101,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         retrofitCallfuntion = RetrofitCallfunction()
 
     }
-
 
 
     override fun onStart() {
@@ -222,11 +223,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             InnerPrinterManager.getInstance()
                 .bindService(this, object : InnerPrinterCallback() {
                     override fun onConnected(service: SunmiPrinterService) {
-                        Public.sunmiPrinterService = service
+                        PublicFunction.sunmiPrinterService = service
                     }
 
                     override fun onDisconnected() {
-                        Public.sunmiPrinterService = null
+                        PublicFunction.sunmiPrinterService = null
                     }
                 })
         } catch (e: InnerPrinterException) {
@@ -239,6 +240,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         if (mSMPayKernel != null) {
             mSMPayKernel?.destroyPaySDK()
         }
+        mSocket.disconnect()
     }
 
 
@@ -246,12 +248,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         override fun onConnectPaySDK() {
             Log.e(TAG, "onConnectPaySDK")
             try {
-                Public.mEMVOptV2 = mSMPayKernel!!.mEMVOptV2
-                Public.mBasicOptV2 = mSMPayKernel!!.mBasicOptV2
-                Public.mPinPadOptV2 = mSMPayKernel!!.mPinPadOptV2
-                Public.mReadCardOptV2 = mSMPayKernel!!.mReadCardOptV2
-                Public.mSecurityOptV2 = mSMPayKernel!!.mSecurityOptV2
-                Public.mTaxOptV2 = mSMPayKernel!!.mTaxOptV2
+                PublicFunction.mEMVOptV2 = mSMPayKernel!!.mEMVOptV2
+                PublicFunction.mBasicOptV2 = mSMPayKernel!!.mBasicOptV2
+                PublicFunction.mPinPadOptV2 = mSMPayKernel!!.mPinPadOptV2
+                PublicFunction.mReadCardOptV2 = mSMPayKernel!!.mReadCardOptV2
+                PublicFunction.mSecurityOptV2 = mSMPayKernel!!.mSecurityOptV2
+                PublicFunction.mTaxOptV2 = mSMPayKernel!!.mTaxOptV2
                 isDisConnectService = false
                 Log.d("SystemUtil", "connect success")
             } catch (e: Exception) {
@@ -291,6 +293,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                      setCatelist(category, isUpdate)
                 }
 
+                override fun onSucess(value: ByteArray) {
+                }
+
                 override fun onFailure() {
 
                 }
@@ -310,11 +315,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         param.setMargins(0, getDP(10f), getDP(10f), 0)
 
         if (update) {
-            for (i in Public().arCate.indices) {
-                if (itemMap.filterKeys { it.contains(Public().arCate[i]) }.isNullOrEmpty()) {
-                    itemMap[Public().arCate[i]] = 0
-                    val cate = Public().arCate[i]
-                    val list = itemMap[Public().arCate[i]]!!
+            for (i in PublicFunction().arCate.indices) {
+                if (itemMap.filterKeys { it.contains(PublicFunction().arCate[i]) }.isNullOrEmpty()) {
+                    itemMap[PublicFunction().arCate[i]] = 0
+                    val cate = PublicFunction().arCate[i]
+                    val list = itemMap[PublicFunction().arCate[i]]!!
 
                 }
             }
@@ -356,12 +361,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             Log.d(TAG, "setCatelist: $new")
             Log.d(TAG, "setCatelist: $old")
         } else {
-            for (i in Public().arCate.indices) {
-                if (newItemMap.filterKeys { it.contains(Public().arCate[i]) }.isNullOrEmpty()) {
-                    newItemMap[Public().arCate[i]] = 0
+            for (i in PublicFunction().arCate.indices) {
+                if (newItemMap.filterKeys { it.contains(PublicFunction().arCate[i]) }.isNullOrEmpty()) {
+                    newItemMap[PublicFunction().arCate[i]] = 0
 
-                    val cate = Public().arCate[i]
-                    val list = newItemMap[Public().arCate[i]]!!
+                    val cate = PublicFunction().arCate[i]
+                    val list = newItemMap[PublicFunction().arCate[i]]!!
 
                     // Do things with the list
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

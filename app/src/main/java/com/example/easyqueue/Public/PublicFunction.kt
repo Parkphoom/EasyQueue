@@ -1,4 +1,4 @@
-package com.example.easyqueue
+package com.example.easyqueue.Public
 
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sunmi.pay.hardware.aidlv2.emv.EMVOptV2
@@ -9,7 +9,7 @@ import com.sunmi.pay.hardware.aidlv2.system.BasicOptV2
 import com.sunmi.pay.hardware.aidlv2.tax.TaxOptV2
 import com.sunmi.peripheral.printer.SunmiPrinterService
 
-class Public {
+class PublicFunction {
     var TAG = "Publicfunction"
 
     companion object {

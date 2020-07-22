@@ -1,6 +1,8 @@
 package com.example.queuedemo_kotlin.Retrofit
 
+import com.example.easyqueue.Retrofit.SpeechData
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -26,5 +28,11 @@ interface SendQueueApi {
     @GET("{id}")
     fun getAllQueue(@Path(value = "id",encoded = true) id: String)
             : Call<RetrofitData>
+
+    @POST("{api}")
+    fun postTexttoSpeech(
+        @Body data: SpeechData,
+        @Path(value = "api", encoded = true) api: String
+    ): Call<ResponseBody>
 }
 

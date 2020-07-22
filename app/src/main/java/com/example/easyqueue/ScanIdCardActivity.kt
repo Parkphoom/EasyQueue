@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import android.os.*
 import android.text.Editable
 import android.text.TextUtils
@@ -18,17 +19,28 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.easyqueue.Public.Convert
+import com.example.easyqueue.Public.Data
+import com.example.easyqueue.Public.PublicFunction
+import com.example.easyqueue.Retrofit.RetrofitCallfunction
+import com.example.easyqueue.Retrofit.SpeechData
+import com.example.easyqueue.Retrofit.retrofitCallback
 import com.sunmi.pay.hardware.aidl.AidlConstants
 import com.sunmi.pay.hardware.aidlv2.bean.ApduRecvV2
 import com.sunmi.pay.hardware.aidlv2.bean.ApduSendV2
 import com.sunmi.pay.hardware.aidlv2.readcard.CheckCardCallbackV2
-import java.io.UnsupportedEncodingException
+import org.json.JSONObject
+import java.io.*
 
 class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
+    private lateinit var retrofitCallfuntion: RetrofitCallfunction
+    private lateinit var speechData: SpeechData
 
     val mnAc: MainActivity = MainActivity()
-    val pub: Public = Public()
-    val conv: Convert = Convert()
+    val pub: PublicFunction =
+        PublicFunction()
+    val conv: Convert =
+        Convert()
 
     var clearnametxtbtn: Button? = null
     var clearidtxtbtn: Button? = null
@@ -54,6 +66,9 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun initView() {
+        speechData = SpeechData()
+        retrofitCallfuntion = RetrofitCallfunction()
+
         clearnametxtbtn = findViewById(R.id.clear_name_btn)
         clearnametxtbtn?.setOnClickListener(this)
         clearidtxtbtn = findViewById(R.id.clear_id_btn)
@@ -154,7 +169,7 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
                     pub.TAG,
                     allType.toString()
                 )
-                Public.mReadCardOptV2!!.checkCard(allType, mReadCardCallback, 300)
+                PublicFunction.mReadCardOptV2!!.checkCard(allType, mReadCardCallback, 300)
                 //            Public.mReadCardOptV2.time
             } catch (e: java.lang.Exception) {
                 e.printStackTrace()
@@ -183,7 +198,7 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
                     pub.TAG,
                     allType.toString()
                 )
-                Public.mReadCardOptV2!!.checkCard(allType, mReadCardCallback, 5000)
+                PublicFunction.mReadCardOptV2!!.checkCard(allType, mReadCardCallback, 5000)
                 //            Public.mReadCardOptV2.time
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -236,13 +251,13 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
                     pub.TAG,
                     "cardtype :$cardType"
                 )
-                if (Public.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_ABSENT) {
+                if (PublicFunction.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_ABSENT) {
                     Log.e(
                         pub.TAG,
                         "cardExit :" + "CARD_ABSENT"
                     )
                     CARD_ABSENT_dialog?.cancel()
-                } else if (Public.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_PRESENT) {
+                } else if (PublicFunction.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_PRESENT) {
                     Log.e(
                         pub.TAG,
                         "cardExit :" + "CARD_PRESENT"
@@ -293,6 +308,23 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
         override fun onPostExecute(result: Void?) {
             dialog!!.cancel()
 
+
+            retrofitCallfuntion.postTTS(this@ScanIdCardActivity, speechData,
+                object : retrofitCallback {
+                    override fun onSucess() {
+                    }
+
+                    override fun onSucess(value: JSONObject) {
+                    }
+
+                    override fun onSucess(bytes: ByteArray) {
+                        playMp3(bytes)
+                    }
+
+
+                    override fun onFailure() {}
+                })
+
             CARD_ABSENT_dialog = createBuilder().create()
             CARD_ABSENT_dialog!!.show()
         }
@@ -302,6 +334,35 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
             handleResult(true)
 
             return null
+        }
+    }
+
+    private val mediaPlayer = MediaPlayer()
+    private fun playMp3(mp3SoundByteArray: ByteArray) {
+        try {
+            // create temp file that will hold byte array
+            val tempMp3: File = File.createTempFile("sound", "mp3", cacheDir)
+            tempMp3.deleteOnExit()
+            val fos = FileOutputStream(tempMp3)
+            fos.write(mp3SoundByteArray)
+            fos.close()
+
+            // resetting mediaplayer instance to evade problems
+            mediaPlayer.reset()
+
+            // In case you run into issues with threading consider new instance like:
+            // MediaPlayer mediaPlayer = new MediaPlayer();
+
+            // Tried passing path directly, but kept getting
+            // "Prepare failed.: status=0x1"
+            // so using file descriptor instead
+            val fis = FileInputStream(tempMp3)
+            mediaPlayer.setDataSource(fis.fd)
+            mediaPlayer.prepare()
+            mediaPlayer.start()
+        } catch (ex: IOException) {
+            val s: String = ex.toString()
+            ex.printStackTrace()
         }
     }
 
@@ -333,7 +394,7 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
                 val recv = ApduRecvV2()
                 var code = 0
                 try {
-                    code = Public.mReadCardOptV2!!.apduCommand(cardType, send, recv)
+                    code = PublicFunction.mReadCardOptV2!!.apduCommand(cardType, send, recv)
                     if (code < 0) {
                         Log.e(
                             pub.TAG,
@@ -369,6 +430,7 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
 //                                        userData.setIdcard(finalRecStr)
 //                                        Log.d("readcard1", userData.getIdcard())
                                         Log.d("readcard1", finalRecStr)
+
                                     }
                                 }
                                 2 -> {
@@ -377,11 +439,17 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
 //                                        userData.setNameth(finalRecStr)
 //                                        Log.d("readcard2", userData.getNameth())
                                         Log.d("readcard2", finalRecStr)
+                                        speechData.text = "สวัสดีค่ะ $finalRecStr"
+                                        speechData.lang = "th"
+                                        speechData.speed = "1"
                                     }
 
                                 }
                             }
                         }
+
+
+
                     }
                 } catch (e: RemoteException) {
                     e.printStackTrace()
@@ -415,12 +483,12 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
                 checkCard()
             } else if (cardType == AidlConstants.CardType.IC.getValue()) {
                 try {
-                    if (nfcfinish && Public.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_ABSENT) {
+                    if (nfcfinish && PublicFunction.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_ABSENT) {
 
                         isReadyToRead = true
                         checkCard()
                     } else if (nfcfinish &&
-                        Public.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_PRESENT
+                        PublicFunction.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_PRESENT
                     ) {
                         isReadyToRead = false
                         handleResult(false)
@@ -431,7 +499,7 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
                 // 继续检卡
                 if (!isFinishing) {
                     try {
-                        if (Public.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_ABSENT) {
+                        if (PublicFunction.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_ABSENT) {
                             Log.e(
                                 pub.TAG,
                                 "cardExit :" + "CARD_ABSENT"
@@ -439,7 +507,7 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
                             CARD_ABSENT_dialog?.cancel()
                             isReadyToRead = true
                             checkCard()
-                        } else if (Public.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_PRESENT) {
+                        } else if (PublicFunction.mReadCardOptV2!!.getCardExistStatus(cardType) === AidlConstants.CardExistStatus.CARD_PRESENT) {
                             Log.e(
                                 pub.TAG,
                                 "cardExit :" + "CARD_PRESENT"
@@ -457,8 +525,8 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun cancelCheckCard() {
         try {
-            Public.mReadCardOptV2!!.cardOff(AidlConstants.CardType.NFC.value)
-            Public.mReadCardOptV2!!.cancelCheckCard()
+            PublicFunction.mReadCardOptV2!!.cardOff(AidlConstants.CardType.NFC.value)
+            PublicFunction.mReadCardOptV2!!.cancelCheckCard()
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }

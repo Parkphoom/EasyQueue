@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.os.RemoteException
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.example.easyqueue.Public.Data
+import com.example.easyqueue.Public.PublicFunction
 import com.sunmi.peripheral.printer.*
 import java.lang.Exception
 import java.util.*
@@ -20,7 +22,7 @@ class SuccessActivity : AppCompatActivity() {
         setContentView(R.layout.activity_success)
 
         Log.d(
-            Public().TAG,
+            PublicFunction().TAG,
             "onCreate: ${Data.userName} ${Data.userCid} ${Data.userTelno} ${Data.category}"
         )
 
@@ -33,7 +35,7 @@ class SuccessActivity : AppCompatActivity() {
     }
 
     private fun initView() {
-        sunmiPrinterService = Public.sunmiPrinterService
+        sunmiPrinterService = PublicFunction.sunmiPrinterService
     }
 
 

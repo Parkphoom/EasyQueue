@@ -1,4 +1,4 @@
-package com.example.easyqueue
+package com.example.easyqueue.Public
 
 import kotlin.experimental.and
 import kotlin.experimental.or
