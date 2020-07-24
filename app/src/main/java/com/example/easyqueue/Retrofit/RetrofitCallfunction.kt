@@ -71,7 +71,7 @@ class RetrofitCallfunction {
 
         val api: SendQueueApi = retrofit.create<SendQueueApi>(SendQueueApi::class.java)
 
-        for(i in 0 until 10){
+        for (i in 0 until 10) {
 
         }
         val call: Call<RetrofitData> = api.typePost(bodyType, bodyTypeCode, bodyTel, ID)
@@ -184,21 +184,22 @@ class RetrofitCallfunction {
                     var respData = response.body()
                     Log.d("getAllQueue_ressss", js)
 
-                    var json: JSONObject? = null
-                    try {
-                        json = JSONObject(js)
-                    } catch (e: JSONException) {
-                        Log.d("getAllQueue_ressss", e.toString())
-
-                    }
 
                     try {
-                        val message: JSONObject = json?.get("message") as JSONObject
-                        retrofitcallback.onSucess(message)
+                        val json: JSONObject = JSONObject(js)
+                        try {
+                            val message: JSONObject = json.get("message") as JSONObject
+                            retrofitcallback.onSucess(message)
 
+                        } catch (e: JSONException) {
+                            Log.d("getAllQueue_ressss", e.toString())
+                            retrofitcallback.onFailure()
+                        }
                     } catch (e: JSONException) {
                         Log.d("getAllQueue_ressss", e.toString())
+                        retrofitcallback.onFailure()
                     }
+
 
                 }
             }

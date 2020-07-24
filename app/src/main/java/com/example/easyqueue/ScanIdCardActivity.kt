@@ -4,7 +4,9 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.os.*
@@ -21,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.example.easyqueue.Public.Convert
 import com.example.easyqueue.Public.Data
+import com.example.easyqueue.Public.MyExceptionHandler
 import com.example.easyqueue.Public.PublicFunction
 import com.example.easyqueue.Retrofit.RetrofitCallfunction
 import com.example.easyqueue.Retrofit.SpeechData
@@ -35,6 +38,7 @@ import java.io.*
 class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var retrofitCallfuntion: RetrofitCallfunction
     private lateinit var speechData: SpeechData
+    private lateinit var prefsettings: SharedPreferences
 
     val mnAc: MainActivity = MainActivity()
     val pub: PublicFunction =
@@ -63,11 +67,18 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
         initView()
         checkCard()
 
+        Thread.setDefaultUncaughtExceptionHandler(
+            MyExceptionHandler(
+                this,
+                MainActivity::class.java
+            )
+        )
     }
 
     private fun initView() {
         speechData = SpeechData()
         retrofitCallfuntion = RetrofitCallfunction()
+        prefsettings = getSharedPreferences(getString(R.string.PrefsSetting), Context.MODE_PRIVATE)
 
         clearnametxtbtn = findViewById(R.id.clear_name_btn)
         clearnametxtbtn?.setOnClickListener(this)
@@ -137,10 +148,18 @@ class ScanIdCardActivity : AppCompatActivity(), View.OnClickListener {
                 idedt?.text?.clear()
             }
             R.id.next_btn -> {
-                startActivity(Intent(this, InputTelnoActivity::class.java))
+//                startActivity(Intent(this, InputTelnoActivity::class.java))
 
                 Data.userName = nameedt?.text.toString()
                 Data.userCid = idedt?.text.toString()
+
+                val goscan = prefsettings.getBoolean(getString(R.string.scanLayoutSetting), true)
+                val gophone = prefsettings.getBoolean(getString(R.string.phoneLayoutSetting), true)
+                if (gophone) {
+                    startActivity(Intent(this, InputTelnoActivity::class.java))
+                }else{
+                    startActivity(Intent(this, SuccessActivity::class.java))
+                }
             }
             R.id.rescan -> {
                 if (MainActivity.isDisConnectService) {

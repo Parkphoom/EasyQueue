@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Settings.SettingsActivity">
+
+    <RelativeLayout
+        android:paddingBottom="5dp"
+        android:id="@+id/headerlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/whiteheader">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5dp"
+            android:text="@string/setting"
+            android:textSize="18sp"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/switchernamelayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/headerlayout"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="10dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/enablescanner"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <com.github.angads25.toggle.widget.LabeledSwitch
+            android:id="@+id/switchername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            app:colorBorder="@color/green_active"
+            app:colorOn="@color/green_active"
+            app:on="false"
+            app:textOff="ปิด"
+            app:textOn="เปิด" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/switcherphonelayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/switchernamelayout"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/enablephone"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <com.github.angads25.toggle.widget.LabeledSwitch
+            android:id="@+id/switcherphone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            app:colorBorder="@color/green_active"
+            app:colorOn="@color/green_active"
+            app:on="false"
+            app:textOff="ปิด"
+            app:textOn="เปิด" />
+    </LinearLayout>
+
+</RelativeLayout>

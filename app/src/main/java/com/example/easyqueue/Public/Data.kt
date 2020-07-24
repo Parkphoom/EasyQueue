@@ -4,7 +4,7 @@ class Data {
     companion object {
         var category: String = ""
         var Queue: String = ""
-        var QueueRemain: String = ""
+        var QueueRemain: String = "0"
 
         var userName: String = ""
         var userCid: String = ""

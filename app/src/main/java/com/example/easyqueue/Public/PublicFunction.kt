@@ -50,7 +50,8 @@ class PublicFunction {
         "Fe",
         "Ge",
         "He",
-        "Ie"
+        "Ie",
+        "Je"
     )
     var CommandAPDU = arrayOf(
         "00A40400",

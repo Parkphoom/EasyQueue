@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.easyqueue.Public.Data
+import com.example.easyqueue.Public.MyExceptionHandler
 import com.example.easyqueue.Public.PublicFunction
 import com.example.easyqueue.Retrofit.RetrofitCallfunction
 import com.example.easyqueue.Retrofit.retrofitCallback
@@ -35,10 +36,16 @@ class InputTelnoActivity : AppCompatActivity(), View.OnClickListener {
 
         initView()
 
-
-
         txtname!!.text = Data.userName
         txtcitizenID!!.text = Data.userCid
+
+//        runOnUiThread(() -> new StartTask().execute());
+        Thread.setDefaultUncaughtExceptionHandler(
+            MyExceptionHandler(
+                this,
+                MainActivity::class.java
+            )
+        )
     }
 
     private fun initView() {
@@ -106,15 +113,15 @@ class InputTelnoActivity : AppCompatActivity(), View.OnClickListener {
         when (v?.id) {
             R.id.next_btn -> {
                 Data.userTelno = telono_edt?.text.toString()
-
-                index = 0
-                for (i in PublicFunction().arCate.indices) {
-                    if (PublicFunction().arCate[i] == Data.category) {
-                        index = i
-                        break
-                    }
-                }
-                callAddqueue(Data.category, PublicFunction().arCateId[index], Data.userTelno)
+                startActivity(Intent(this@InputTelnoActivity, SuccessActivity::class.java))
+//                index = 0
+//                for (i in PublicFunction().arCate.indices) {
+//                    if (PublicFunction().arCate[i] == Data.category) {
+//                        index = i
+//                        break
+//                    }
+//                }
+//                callAddqueue(Data.category, PublicFunction().arCateId[index], Data.userTelno)
             }
             R.id.clear_telono_btn -> {
                 telono_edt?.text?.clear()
@@ -122,7 +129,7 @@ class InputTelnoActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    var i = 0
+    var i = 1
     private fun callAddqueue(
         category: String,
         cateId: String,
@@ -139,16 +146,20 @@ class InputTelnoActivity : AppCompatActivity(), View.OnClickListener {
                 }
 
                 override fun onSucess(value: JSONObject) {
-                    if (i < 500) {
-                        val Queue = value.get("queue").toString()
-                        val QueueRemain = value.get("queueWait").toString()
-                        Log.d("onSucess", value.toString())
-                        Log.d("onSucess", Queue)
-                        Log.d("onSucess", QueueRemain)
-                        Data.Queue = Queue
-                        Data.QueueRemain = QueueRemain
-                        callAddqueue(Data.category, PublicFunction().arCateId[index], Data.userTelno)
-                    }else{
+//                    if (i < 55) {
+//                        val Queue = value.get("queue").toString()
+//                        val QueueRemain = value.get("queueWait").toString()
+//                        Log.d("onSucess", value.toString())
+//                        Log.d("onSucess", Queue)
+//                        Log.d("onSucess", QueueRemain)
+//                        Data.Queue = Queue
+//                        Data.QueueRemain = QueueRemain
+//                        callAddqueue(
+//                            Data.category,
+//                            PublicFunction().arCateId[index],
+//                            Data.userTelno
+//                        )
+//                    } else {
                     val Queue = value.get("queue").toString()
                     val QueueRemain = value.get("queueWait").toString()
                     Log.d("onSucess", value.toString())
@@ -157,9 +168,9 @@ class InputTelnoActivity : AppCompatActivity(), View.OnClickListener {
                     Data.Queue = Queue
                     Data.QueueRemain = QueueRemain
                     startActivity(Intent(this@InputTelnoActivity, SuccessActivity::class.java))
-                    }
-                    Log.d("loopcall", "onSucess: $i")
-                    i++
+//                    }
+//                    Log.d("loopcall", "onSucess: $i")
+//                    i++
                 }
 
                 override fun onSucess(value: ByteArray) {

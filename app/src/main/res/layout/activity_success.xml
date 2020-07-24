@@ -7,6 +7,15 @@
     android:background="#BFBFF4C2"
     tools:context=".SuccessActivity">
 
+    <Button
+        android:id="@+id/closebtn"
+        android:layout_marginTop="3dp"
+        android:layout_marginEnd="3dp"
+        android:background="@drawable/icons8_delete_26px"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="36dp"
+        android:layout_height="36dp"/>
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="300dp"

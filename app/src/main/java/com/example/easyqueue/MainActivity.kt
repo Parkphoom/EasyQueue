@@ -1,6 +1,8 @@
 package com.example.easyqueue
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
@@ -13,9 +15,11 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.easyqueue.Public.Data
+import com.example.easyqueue.Public.MyExceptionHandler
 import com.example.easyqueue.Public.PublicFunction
 import com.example.easyqueue.Retrofit.RetrofitCallfunction
 import com.example.easyqueue.Retrofit.retrofitCallback
+import com.example.easyqueue.Settings.SettingsActivity
 import com.sunmi.peripheral.printer.InnerPrinterCallback
 import com.sunmi.peripheral.printer.InnerPrinterException
 import com.sunmi.peripheral.printer.InnerPrinterManager
@@ -27,15 +31,10 @@ import org.json.JSONObject
 import sunmi.paylib.SunmiPayKernel
 import sunmi.paylib.SunmiPayKernel.ConnectCallback
 import java.util.*
-import kotlin.collections.List
-import kotlin.collections.arrayListOf
-import kotlin.collections.filterKeys
-import kotlin.collections.indices
-import kotlin.collections.isNullOrEmpty
-import kotlin.collections.mutableMapOf
 import kotlin.collections.set
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
+    private lateinit var prefsettings: SharedPreferences
     private lateinit var retrofitCallfuntion: RetrofitCallfunction
     private var mSMPayKernel: SunmiPayKernel? = null
     private val TAG = "SunmiSTART"
@@ -49,6 +48,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     lateinit var mSocket: Socket
 
+    private var settingbtn: Button? = null
+
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +58,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         initView()
         connectSocket()
 
+
+        Thread.setDefaultUncaughtExceptionHandler(
+            MyExceptionHandler(
+                this,
+                MainActivity::class.java
+            )
+        )
     }
 
     private fun connectSocket() {
@@ -74,6 +82,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         //Register all the listener and callbacks here.
         mSocket.on(Socket.EVENT_CONNECT) {
             Log.d("IoSockket", "connect")
+
             callGetAllqueue(false)
         }
         mSocket.on("addQueue") {
@@ -91,7 +100,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             callGetAllqueue(true)
         } // To know if the new user entered the room.
 
-        mSocket.on(Socket.EVENT_DISCONNECT){
+        mSocket.on(Socket.EVENT_DISCONNECT) {
             Log.d("IoSockket", "disconnect")
         }
     }
@@ -99,7 +108,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun initView() {
         retrofitCallfuntion = RetrofitCallfunction()
+        prefsettings = getSharedPreferences(getString(R.string.PrefsSetting), Context.MODE_PRIVATE)
 
+        settingbtn = findViewById(R.id.settingbtn)
+        settingbtn?.setOnClickListener(this)
     }
 
 
@@ -133,13 +145,24 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         relativeLayout.addView(btnview)
 
         relativeLayout.setOnClickListener {
-            if (isDisConnectService) {
-                connectPayService()
-                Toast.makeText(this, R.string.connect_loading, Toast.LENGTH_SHORT)
-                    .show()
+            val goscan = prefsettings.getBoolean(getString(R.string.scanLayoutSetting), true)
+            val gophone = prefsettings.getBoolean(getString(R.string.phoneLayoutSetting), true)
+            if (!goscan && !gophone) {
+                Data.category = cate
+                startActivity(Intent(this, SuccessActivity::class.java))
+            } else if (goscan) {
+                if (isDisConnectService) {
+                    connectPayService()
+                    Toast.makeText(this, R.string.connect_loading, Toast.LENGTH_SHORT)
+                        .show()
+                }
+                Data.category = cate
+                startActivity(Intent(this, ScanIdCardActivity::class.java))
+            } else if (gophone) {
+                Data.category = cate
+                startActivity(Intent(this, InputTelnoActivity::class.java))
             }
-            Data.category = cate
-            startActivity(Intent(this, ScanIdCardActivity::class.java))
+
         }
 
         return relativeLayout
@@ -206,6 +229,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(v: View?) {
         when (v?.id) {
+            R.id.settingbtn -> {
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
         }
     }
 
@@ -290,33 +316,89 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                         category.add(strcate)
                     }
                     Log.d(TAG, "category: ${category}")
-                     setCatelist(category, isUpdate)
+                    setCatelist(category, isUpdate)
                 }
 
                 override fun onSucess(value: ByteArray) {
                 }
 
                 override fun onFailure() {
+                    val category = arrayListOf<String>()
+                    for (i in 0 until PublicFunction().arCate.size) {
+                        val cate = PublicFunction().arCate[i]
+                        category.add(cate)
+                    }
+                    Log.d(TAG, "category: ${category}")
+                    insertPoint = findViewById(R.id.container)
+                    val param: LinearLayout.LayoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    param.setMargins(0, getDP(10f), 0, 0)
 
+                    for (i in PublicFunction().arCate.indices) {
+                        if (newItemMap.filterKeys { it.contains(PublicFunction().arCate[i]) }
+                                .isNullOrEmpty()) {
+                            newItemMap[PublicFunction().arCate[i]] = 0
+
+                            val cate = PublicFunction().arCate[i]
+                            val list = newItemMap[PublicFunction().arCate[i]]!!
+
+                            // Do things with the list
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    val v = createList(list, cate, list.toString()) as RelativeLayout
+//                    Log.d(TAG, "setCatelistView: ${(v.getChildAt(0) as TextView).text}")
+                                insertPoint?.addView(
+                                    createList(list, cate, list.toString()),
+                                    0,
+                                    param
+                                )
+                            }
+                        }
+                    }
+                    for (i in category.indices) {
+                        if (newItemMap.filterKeys { it.contains(category[i]) }.isNullOrEmpty()) {
+                            newItemMap[category[i]] = 0
+
+                            val cate = category[i]
+                            val list = newItemMap[category[i]]!!
+
+                            // Do things with the list
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    val v = createList(list, cate, list.toString()) as RelativeLayout
+//                    Log.d(TAG, "setCatelistView: ${(v.getChildAt(0) as TextView).text}")
+                                insertPoint?.addView(
+                                    createList(list, cate, list.toString()),
+                                    0,
+                                    param
+                                )
+                            }
+                        }
+
+                    }
+                    Log.d(TAG, "setCatelist: ${newItemMap}")
                 }
             })
     }
 
+    private var insertPoint: ViewGroup? = null
     private fun setCatelist(
         distinctcategory1: List<String>,
         update: Boolean
     ) {
         // insert into main view
-        val insertPoint: ViewGroup = findViewById(R.id.container)
+
+        insertPoint = findViewById(R.id.container)
         val param: LinearLayout.LayoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        param.setMargins(0, getDP(10f), getDP(10f), 0)
+        param.setMargins(0, getDP(10f), 0, 0)
 
         if (update) {
             for (i in PublicFunction().arCate.indices) {
-                if (itemMap.filterKeys { it.contains(PublicFunction().arCate[i]) }.isNullOrEmpty()) {
+                if (itemMap.filterKeys { it.contains(PublicFunction().arCate[i]) }
+                        .isNullOrEmpty()) {
                     itemMap[PublicFunction().arCate[i]] = 0
                     val cate = PublicFunction().arCate[i]
                     val list = itemMap[PublicFunction().arCate[i]]!!
@@ -341,7 +423,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             try {
                 for (i in new.indices) {
                     if (new[i] != old[i]) {
-                        val li = insertPoint.getChildAt(indexes.indexOf(indexes[i])) as RelativeLayout
+                        val li = insertPoint?.getChildAt(indexes.indexOf(indexes[i])) as RelativeLayout
                         val txt = li.getChildAt(0) as TextView
                         val txt2 = li.getChildAt(1) as TextView
                         Log.d(TAG, "setCatelist: ${indexes[i]}")
@@ -350,10 +432,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                         txt2.text = new[i].toString()
                         newItemMap = itemMap.toMutableMap()
                         itemMap.clear()
-                        break
                     }
                 }
-            } catch (e: IndexOutOfBoundsException){
+            } catch (e: IndexOutOfBoundsException) {
                 Log.d(TAG, "setCatelist: $e")
             }
 
@@ -361,8 +442,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             Log.d(TAG, "setCatelist: $new")
             Log.d(TAG, "setCatelist: $old")
         } else {
+            Log.d("insertpoint", "setCatelist: ${insertPoint?.childCount}")
+            insertPoint?.removeAllViews()
+            newItemMap = mutableMapOf<String, Int>()
+
+
             for (i in PublicFunction().arCate.indices) {
-                if (newItemMap.filterKeys { it.contains(PublicFunction().arCate[i]) }.isNullOrEmpty()) {
+                if (newItemMap.filterKeys { it.contains(PublicFunction().arCate[i]) }
+                        .isNullOrEmpty()) {
                     newItemMap[PublicFunction().arCate[i]] = 0
 
                     val cate = PublicFunction().arCate[i]
@@ -372,7 +459,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                    val v = createList(list, cate, list.toString()) as RelativeLayout
 //                    Log.d(TAG, "setCatelistView: ${(v.getChildAt(0) as TextView).text}")
-                        insertPoint.addView(
+                        insertPoint?.addView(
                             createList(list, cate, list.toString()),
                             0,
                             param
@@ -391,7 +478,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                    val v = createList(list, cate, list.toString()) as RelativeLayout
 //                    Log.d(TAG, "setCatelistView: ${(v.getChildAt(0) as TextView).text}")
-                        insertPoint.addView(
+                        insertPoint?.addView(
                             createList(list, cate, list.toString()),
                             0,
                             param
@@ -404,7 +491,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
                     val indexes: List<String> = ArrayList<String>(newItemMap.keys).asReversed()
                     val li =
-                        insertPoint.getChildAt(indexes.indexOf(distinctcategory1[i])) as RelativeLayout?
+                        insertPoint?.getChildAt(indexes.indexOf(distinctcategory1[i])) as RelativeLayout?
                     val txt = li?.getChildAt(0) as TextView?
                     if (txt?.text == distinctcategory1[i]) {
                         val txt2 = li?.getChildAt(1) as TextView?
