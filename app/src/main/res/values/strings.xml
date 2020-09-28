@@ -1,7 +1,8 @@
 <resources>
     //URL MAIN
-    <string name="URL">http://10.0.0.205:</string>
-<!--        <string name="URL">http://18.139.84.245:</string>-->
+    <!--        <string name="URL">http://10.0.0.205:</string>-->
+    <!--        <string name="URL">http://18.139.84.245:</string>-->
+    <string name="URL">http://3.0.93.25:</string>
     <string name="PORT">4001/</string>
     <string name="ID">5e14a0eba3d7600cac019599/</string>
     <string name="APIaddqueue">addQueue/</string>
@@ -38,4 +39,9 @@
     <string name="enablescanner">หน้าจอการกรอกชื่อ - นามสกุล</string>
     <string name="enablephone">หน้าจอการกรอกเบอร์โทรศัพท์</string>
     <string name="setting">ตั้งค่า</string>
+    <string name="add">เพิ่ม</string>
+    <string name="importtextfile">นำเข้า (.txt)</string>
+    <string name="save">บันทึก</string>
+    <string name="delete">ลบ</string>
+    <string name="AddnewCategory">เพิ่มแผนกใหม่</string>
 </resources>
