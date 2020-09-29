@@ -1,6 +1,7 @@
 package com.wacinfo.easyqueue
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -31,8 +32,6 @@ import com.sunmi.peripheral.printer.InnerPrinterCallback
 import com.sunmi.peripheral.printer.InnerPrinterException
 import com.sunmi.peripheral.printer.InnerPrinterManager
 import com.sunmi.peripheral.printer.SunmiPrinterService
-import com.wacinfo.easyqueue.Adapter.CategoryItem
-import com.wacinfo.easyqueue.Adapter.CategoryListAdapter
 import com.wacinfo.easyqueue.Adapter.ShowQueueAdapter
 import com.wacinfo.easyqueue.Adapter.ShowQueueitem
 import com.wacinfo.easyqueue.DB.DBCategoryManager
@@ -53,11 +52,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private var mSMPayKernel: SunmiPayKernel? = null
     private val TAG = "SunmiSTART"
 
-    private var dbCategoryManager: DBCategoryManager? =null
+    private var dbCategoryManager: DBCategoryManager? = null
     lateinit var dataDB: MutableList<*>
-    private var categoryItem: List<ShowQueueitem>? = null
-    var recyclerView: RecyclerView? = null
-    var adapter: ShowQueueAdapter? = null
+
 
     var newItemMap = mutableMapOf<String, Int>()
     var itemMap = mutableMapOf<String, Int>()
@@ -88,43 +85,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        categoryItem = ArrayList()
-        dbCategoryManager?.open()
-        dataDB = dbCategoryManager?.getAll()!!
-        for (i in 0 until dataDB.size) {
-            val values: JSONObject? = dataDB[i] as JSONObject?
-            try {
-                val catname = values!!.getString(DatabaseHelper.Category_name)
-                val catID = values.getString(DatabaseHelper.Category_code)
-                Log.d("dataDB", "$catname $catID")
-                (categoryItem as ArrayList<ShowQueueitem>).add(ShowQueueitem(catname,catID,"0"))
 
-            } catch (e: JSONException) {
-                e.printStackTrace()
-                Log.d("dataDB", e.toString())
-            }
-        }
-        dbCategoryManager?.close()
 
-        setUpRecyclerView(categoryItem as ArrayList<ShowQueueitem>)
-    }
-    private fun setUpRecyclerView(listitem: List<ShowQueueitem>) {
-        this.runOnUiThread {
-            recyclerView = findViewById<View>(R.id.recyclerView) as RecyclerView
-
-            //        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-            val layoutManager = LinearLayoutManager(this)
-            layoutManager.orientation = LinearLayoutManager.VERTICAL
-            recyclerView!!.setHasFixedSize(true)
-            recyclerView!!.layoutManager = layoutManager
-
-            adapter = ShowQueueAdapter(this, listitem)
-            recyclerView!!.adapter = adapter
-
-        }
-    }
 
 
     private fun callingPermission() {
@@ -206,7 +168,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun createList(
         id: Int,
         cate: String,
-        que: String
+        que: String,
+        code: String
     ): View? {
         // Creating a new RelativeLayout
         val relativeLayout = RelativeLayout(this)
@@ -228,8 +191,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         relativeLayout.setOnClickListener {
             val goscan = prefsettings.getBoolean(getString(R.string.scanLayoutSetting), true)
             val gophone = prefsettings.getBoolean(getString(R.string.phoneLayoutSetting), true)
+
             if (!goscan && !gophone) {
                 Data.category = cate
+                Data.categorycode = code
+                Log.d("send1", "${Data.category} ${Data.categorycode}")
                 startActivity(Intent(this, SuccessActivity::class.java))
                 finish()
             } else if (goscan) {
@@ -239,10 +205,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                         .show()
                 }
                 Data.category = cate
+                Data.categorycode = code
+                Log.d("send2", "${Data.category} ${Data.categorycode}")
                 startActivity(Intent(this, ScanIdCardActivity::class.java))
                 finish()
             } else if (gophone) {
                 Data.category = cate
+                Data.categorycode = code
+                Log.d("send3", "${Data.category} ${Data.categorycode}")
                 startActivity(Intent(this, InputTelnoActivity::class.java))
                 finish()
             }
@@ -407,16 +377,43 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 override fun onSucess(value: JSONObject) {
 
                     val values = value["values"] as JSONArray
-                    Log.d("getAllQueue_ressss", values.toString())
+                    Log.d("getAllQueue_onSucess", values.toString())
 
-                    val category = arrayListOf<String>()
+                    val categorySV = arrayListOf<String>()
                     for (i in 0 until values.length()) {
                         val cate = values[i] as JSONObject
                         val strcate = cate.getString("category")
-                        category.add(strcate)
+                        categorySV.add(strcate)
                     }
-                    Log.d(TAG, "category: ${category}")
-                    setCatelist(category, isUpdate)
+                    Log.d(TAG, "category_onSucess: ${categorySV}")
+
+                    val categoryDB = arrayListOf<String>()
+                    dbCategoryManager?.open()
+                    dataDB = dbCategoryManager?.getAll()!!
+                    for (i in 0 until dataDB.size) {
+                        val values: JSONObject? = dataDB[i] as JSONObject?
+                        try {
+                            val catname = values!!.getString(DatabaseHelper.Category_name)
+                            val catID = values.getString(DatabaseHelper.Category_code)
+                            Log.d("dataDB", "$catname $catID")
+                            categoryDB.add(catname)
+//                            (categoryItem as ArrayList<ShowQueueitem>).add(ShowQueueitem(catname,catID,"0"))
+
+                        } catch (e: JSONException) {
+                            e.printStackTrace()
+                            Log.d("dataDB", e.toString())
+                        }
+                    }
+                    dbCategoryManager?.close()
+
+                    val keysOfB =
+                        categoryDB.map { it } // or listOfB.map { it.key }.also { keysOfB ->
+                    categorySV.removeAll {
+                        it !in keysOfB
+                    }
+                    Log.d(TAG, "onSucess: $categorySV")
+
+                    setCatelist(categorySV, isUpdate)
                 }
 
                 override fun onSucess(value: ByteArray) {
@@ -425,28 +422,28 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 override fun onFailure() {
                     val category = arrayListOf<String>()
                     val code = arrayListOf<String>()
-                    for (i in 0 until PublicFunction().arCate.size) {
-                        val cate = PublicFunction().arCate[i]
-                        category.add(cate)
-                    }
-//                    dbCategoryManager?.open()
-//                    dataDB = dbCategoryManager?.getAll()!!
-//                    for (i in 0 until dataDB.size) {
-//                        val values: JSONObject? = dataDB[i] as JSONObject?
-//                        try {
-//                            val catname = values!!.getString(DatabaseHelper.Category_name)
-//                            val catID = values.getString(DatabaseHelper.Category_code)
-//                            Log.d("dataDB", "$catname $catID")
-//                            category.add(catname)
-//                            code.add(catname)
-////                            (categoryItem as ArrayList<ShowQueueitem>).add(ShowQueueitem(catname,catID,"0"))
-//
-//                        } catch (e: JSONException) {
-//                            e.printStackTrace()
-//                            Log.d("dataDB", e.toString())
-//                        }
+//                    for (i in 0 until PublicFunction().arCate.size) {
+//                        val cate = PublicFunction().arCate[i]
+//                        category.add(cate)
 //                    }
-//                    dbCategoryManager?.close()
+                    dbCategoryManager?.open()
+                    dataDB = dbCategoryManager?.getAll()!!
+                    for (i in 0 until dataDB.size) {
+                        val values: JSONObject? = dataDB[i] as JSONObject?
+                        try {
+                            val catname = values!!.getString(DatabaseHelper.Category_name)
+                            val catID = values.getString(DatabaseHelper.Category_code)
+                            Log.d("dataDB", "$catname $catID")
+                            category.add(catname)
+                            code.add(catID)
+//                            (categoryItem as ArrayList<ShowQueueitem>).add(ShowQueueitem(catname,catID,"0"))
+
+                        } catch (e: JSONException) {
+                            e.printStackTrace()
+                            Log.d("dataDB", e.toString())
+                        }
+                    }
+                    dbCategoryManager?.close()
 
                     Log.d(TAG, "category: ${category}")
 
@@ -463,11 +460,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                             newItemMap[category[i]] = 0
 
                             val cate = category[i]
+                            val code = code[i]
                             val list = newItemMap[category[i]]!!
 
                             // Do things with the list
                             insertPoint?.addView(
-                                createList(list, cate, list.toString()),
+                                createList(list, cate, list.toString(), code),
                                 0,
                                 param
                             )
@@ -478,13 +476,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                             newItemMap[category[i]] = 0
 
                             val cate = category[i]
+                            val code = code[i]
                             val list = newItemMap[category[i]]!!
 
                             // Do things with the list
 //                    val v = createList(list, cate, list.toString()) as RelativeLayout
 //                    Log.d(TAG, "setCatelistView: ${(v.getChildAt(0) as TextView).text}")
                             insertPoint?.addView(
-                                createList(list, cate, list.toString()),
+                                createList(list, cate, list.toString(), code),
                                 0,
                                 param
                             )
@@ -517,7 +516,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 val catID = values.getString(DatabaseHelper.Category_code)
                 Log.d("dataDB", "$catname $catID")
                 category.add(catname)
-                code.add(catname)
+                code.add(catID)
 //                            (categoryItem as ArrayList<ShowQueueitem>).add(ShowQueueitem(catname,catID,"0"))
 
             } catch (e: JSONException) {
@@ -536,11 +535,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         if (update) {
             for (i in category.indices) {
-                if (itemMap.filterKeys { it.contains(PublicFunction().arCate[i]) }
+                if (itemMap.filterKeys { it.contains(category[i]) }
                         .isNullOrEmpty()) {
-                    itemMap[PublicFunction().arCate[i]] = 0
-                    val cate = PublicFunction().arCate[i]
-                    val list = itemMap[PublicFunction().arCate[i]]!!
+                    itemMap[category[i]] = 0
+                    val cate = category[i]
+                    val list = itemMap[category[i]]!!
 
                 }
             }
@@ -587,19 +586,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             newItemMap = mutableMapOf<String, Int>()
 
 
-            for (i in PublicFunction().arCate.indices) {
-                if (newItemMap.filterKeys { it.contains(PublicFunction().arCate[i]) }
+            for (i in category.indices) {
+                if (newItemMap.filterKeys { it.contains(category[i]) }
                         .isNullOrEmpty()) {
-                    newItemMap[PublicFunction().arCate[i]] = 0
+                    newItemMap[category[i]] = 0
 
-                    val cate = PublicFunction().arCate[i]
-                    val list = newItemMap[PublicFunction().arCate[i]]!!
+                    val cate = category[i]
+                    val code = code[i]
+                    val list = newItemMap[category[i]]!!
 
                     // Do things with the list
 //                    val v = createList(list, cate, list.toString()) as RelativeLayout
 //                    Log.d(TAG, "setCatelistView: ${(v.getChildAt(0) as TextView).text}")
                     insertPoint?.addView(
-                        createList(list, cate, list.toString()),
+                        createList(list, cate, list.toString(), code),
                         0,
                         param
                     )
@@ -612,13 +612,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     newItemMap[distinctcategory1[i]] = 1
 
                     val cate = distinctcategory1[i]
+                    val code = code[i]
                     val list = newItemMap[distinctcategory1[i]]!!
 
                     // Do things with the list
 //                    val v = createList(list, cate, list.toString()) as RelativeLayout
-//                    Log.d(TAG, "setCatelistView: ${(v.getChildAt(0) as TextView).text}")
+//                    Log.d(TAG, "setCatelistView: $cate $code ")
                     insertPoint?.addView(
-                        createList(list, cate, list.toString()),
+                        createList(list, cate, list.toString(), code),
                         0,
                         param
                     )

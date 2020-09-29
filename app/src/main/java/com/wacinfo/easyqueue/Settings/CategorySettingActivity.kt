@@ -33,6 +33,7 @@ import java.io.*
 
 class CategorySettingActivity : AppCompatActivity(), View.OnClickListener {
 
+    private var TAG = "CategorySettingLog"
     private var dbCategoryManager:DBCategoryManager? =null
     private var categoryItem: List<CategoryItem>? = null
     var recyclerView: RecyclerView? = null
@@ -56,6 +57,13 @@ class CategorySettingActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onResume() {
         super.onResume()
+        Log.d(TAG, "onResume: ")
+        readDataDB()
+
+        setUpRecyclerView(categoryItem as ArrayList<CategoryItem>)
+    }
+
+    private fun readDataDB(){
         categoryItem = ArrayList()
         dbCategoryManager?.open()
         dataDB = dbCategoryManager?.getAll()!!
@@ -73,8 +81,6 @@ class CategorySettingActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
         dbCategoryManager?.close()
-
-        setUpRecyclerView(categoryItem as ArrayList<CategoryItem>)
     }
 
     private fun setUpRecyclerView(listitem: List<CategoryItem>) {
@@ -179,6 +185,10 @@ class CategorySettingActivity : AppCompatActivity(), View.OnClickListener {
 
                 inputStream.close()
                 ret = stringBuilder.toString()
+
+                readDataDB()
+                adapter?.notifyDataSetChanged()
+                setUpRecyclerView(categoryItem as ArrayList<CategoryItem>)
             }
         } catch (e: FileNotFoundException) {
             Log.e("readFromFile", "File not found: " + e.toString())

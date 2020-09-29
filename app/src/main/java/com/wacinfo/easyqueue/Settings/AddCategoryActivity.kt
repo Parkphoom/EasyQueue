@@ -45,7 +45,7 @@ class AddCategoryActivity : AppCompatActivity(), View.OnClickListener {
         when(v?.id){
             R.id.save_btn->{
                 if(code_edt!!.text.toString().isNotEmpty() && name_edt!!.text.toString().isNotEmpty()){
-                    insertCategory(code_edt!!.text.toString(),name_edt!!.text.toString())
+                    insertCategory(name_edt!!.text.toString(),code_edt!!.text.toString())
                 }
             }
         }

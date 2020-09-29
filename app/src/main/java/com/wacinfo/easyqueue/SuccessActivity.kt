@@ -32,14 +32,14 @@ class SuccessActivity : AppCompatActivity(), View.OnClickListener {
         initView()
         bindPrintService()
 
-        var index = 0
-        for (i in PublicFunction().arCate.indices) {
-            if (PublicFunction().arCate[i] == Data.category) {
-                index = i
-                Data.categorycode = PublicFunction().arCateId[index]
-                break
-            }
-        }
+//        var index = 0
+//        for (i in PublicFunction().arCate.indices) {
+//            if (PublicFunction().arCate[i] == Data.category) {
+//                index = i
+//                Data.categorycode = PublicFunction().arCateId[index]
+//                break
+//            }
+//        }
 
         Log.d(
             PublicFunction().TAG,
